@@ -178,6 +178,12 @@ client.on('message', msg => {
   }
 
   if(msg.content.startsWith('.ban')) {
+    // user who can ban
+    console.log(msg.client.user.id, 'ban')
+    if(msg.channel.id != channelID && msg.client.user.id != '696000898568028170') {
+      msg.channel.send(`Sorry, you don't have permission to this command`)
+      return 
+    }
     if(second && third) {
       client.guilds.fetch(second).then(guild => {
         guild.client.users.fetch(third).then(user => {
