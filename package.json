@@ -1,0 +1,23 @@
+{
+  "name": "report-bot",
+  "version": "1.0.0",
+  "description": "discord moderation bot",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [
+    "bot",
+    "discord"
+  ],
+  "author": "Yuliana",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^12.5.3",
+    "redux": "^4.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
