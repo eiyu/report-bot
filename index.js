@@ -4,7 +4,7 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 const {attachIsImage, ban} = require('./lib.js')
 const {store} = require('./db.js')
 
-const channelID = '724648797300457532' //'840477001545941022'
+const channelID = '840477001545941022' //'724648797300457532' //
 
 const getUserFromMention = (mention) => {
 	// The id is the first and only match found by the RegEx.
