@@ -6,6 +6,14 @@ const {store} = require('./db.js')
 
 const channelID = '840477001545941022' //'724648797300457532' //
 
+const banuser = {
+  "696000898568028170": true,
+  "269700566169550850": true,
+  "706814151028113438": true,
+  "692678251193303040": true,
+  "317283391982534666": true
+  }
+
 const getUserFromMention = (mention) => {
 	// The id is the first and only match found by the RegEx.
 	const matches = mention.match(/^<@!?(\d+)>$/);
@@ -179,8 +187,9 @@ client.on('message', msg => {
 
   if(msg.content.startsWith('.ban')) {
     // user who can ban
-    console.log(msg.client.user.id, 'ban')
-    if(msg.channel.id != channelID && msg.client.user.id != '696000898568028170') {
+    // console.log(banuser.hasOwnProperty(msg.client.user.id), 'ban')
+    if(msg.channel.id != channelID && !banuser.hasOwnProperty(msg.client.user.id)) {
+      console.log('shit')
       msg.channel.send(`Sorry, you don't have permission to this command`)
       return 
     }
@@ -243,6 +252,5 @@ client.on('messageReactionAdd', (reaction, user) => {
   }
 
 });
-
 
 client.login(CLIENT_KEY);
