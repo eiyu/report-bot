@@ -97,6 +97,7 @@ client.on('message', msg => {
           await embedMessage.react('✅');
           await embedMessage.react('❌');
         });
+        channel.send(`User id: ${data.userId} \n Channel id: ${data.channelId}`)
 
         return;
       })
@@ -183,6 +184,8 @@ client.on('message', msg => {
         await embedMessage.react('✅');
         await embedMessage.react('❌');
       });
+
+      msg.channel.send(`User id: ${data.userId} \n Channel id: ${data.channelId}`)
   }
 
   if(msg.content.startsWith('.ban')) {
