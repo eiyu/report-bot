@@ -41,7 +41,7 @@ console.log('ok..')
 });
 
 client.on('message', msg => {
-  const [first, second, third] = msg.content.split(' ')
+  const [first, second, third, ...rest] = msg.content.split(' ')
   if (!msg.guild) return;
   // -------------------------------------------------------------- channel id
   const channel = client.channels.cache.find(channel => channel.id === channelID)
@@ -192,11 +192,12 @@ client.on('message', msg => {
     // user who can ban
     // console.log(banuser.hasOwnProperty(msg.client.user.id), 'ban')
     if(msg.channel.id != channelID && !banuser.hasOwnProperty(msg.client.user.id)) {
-      console.log('shit')
+      // console.log('shit')
       msg.channel.send(`Sorry, you don't have permission to this command`)
       return 
     }
-    if(second && third) {
+    console.log(second && third && banuser.hasOwnProperty(msg.client.user.id))
+    if(second && third && banuser.hasOwnProperty(msg.client.user.id)) {
       client.guilds.fetch(second).then(guild => {
         guild.client.users.fetch(third).then(user => {
         const member = guild.members.resolve(user)
@@ -221,13 +222,13 @@ client.on('message', msg => {
 });
 
 client.on('messageReactionAdd', (reaction, user) => {
-  
   const id = reaction.message.embeds[0].fields[2].value
   const userId = reaction.message.embeds[0].title.valueOf()
   const guildId = reaction.message.embeds[0].fields[1].value
   
+  if(reaction.message.guild.id != guildId) return
     // add more flag like id if want to be safe 
-  if(!user.bot && reaction.emoji.name === '✅') {
+  if(!user.bot && reaction.emoji.name === '✅' && !banuser.hasOwnProperty(msg.client.user.id) ) {
       // ban / kick
       client.guilds.fetch(guildId).then(guild => {
         guild.client.users.fetch(userId).then(user => {
