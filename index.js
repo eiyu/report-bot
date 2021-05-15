@@ -1,4 +1,5 @@
 const CLIENT_KEY = 'ODQwMTE5MzIxOTAzODkwNDUy.YJTkFw.WNxGmNXxZly407dN3SjrzAVOktg';
+const DEV_KEY = 'ODQyOTM2MzgzNzU1NTE3OTY0.YJ8jrg.5qacWCrJpJXHMAYGlbTe_kqzF3E'
 const { Client, Intents, MessageEmbed, ClientUser, Message } = require('discord.js');
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 const {attachIsImage, ban} = require('./lib.js')
@@ -7,6 +8,7 @@ const {store} = require('./db.js')
 const channelID = '840477001545941022' //'724648797300457532' //
 
 const banuser = {
+  "362965490513215498": true, //me
   "696000898568028170": true,
   "269700566169550850": true,
   "706814151028113438": true,
@@ -30,6 +32,9 @@ const getUserFromMention = (mention) => {
 
 client.on('ready', () => {
 // channel.send(message)
+
+
+
 console.log('ok..')
   client.user.setPresence({
       status: "online",  //You can show online, idle....
@@ -84,10 +89,11 @@ client.on('message', msg => {
           { name: 'Guild Name', value: data.guildName },
           { name: 'Guild ID', value: data.guildId },
           { name: 'Message ID', value: data.messageId },
-          { name: 'Name', value: data.name },
+          { name: 'Reporter Name', value: data.name },
           { name: '\u200B', value: '\u200B' },
           // get sender text
-          { name: 'Text', value: data.text, inline: true },
+          { name: 'Scammer Id', value: data.text },
+          { name: 'Guide', value: `React to ✅ to ban the scammer or using .ban command \n React to ❌ to delete this embed`, inline: true },
         )
         .setImage(data.attachments)
         .setTimestamp()
@@ -97,7 +103,7 @@ client.on('message', msg => {
           await embedMessage.react('✅');
           await embedMessage.react('❌');
         });
-        channel.send(`User id: ${data.userId} \n Channel id: ${data.channelId}`)
+        channel.send(`Scammer id: ${data.text} \n Channel id: ${data.channelId}`)
 
         return;
       })
@@ -113,15 +119,16 @@ client.on('message', msg => {
     .setTitle('welcome to help')
     .setDescription(`
       This is help page \n
-      .list \n
-      .view <message id> \n
-      .ban <userid> <guildid> <reason>
+      .list \n - display unreviewed message
+      .view <message id> \n - display embed message
+      .ban <userid> <guildid> - ban user id from server
+      .wipe <userid> - ban user id (all server)
     `)
     .setFooter('Report bot by: Sagara', 'https://github.com/eiyu');
     msg.channel.send(helpEmbed);
 
   }
-
+  
   if(msg.content.startsWith('.list')) {
     
     const st = store.getState().value
@@ -165,20 +172,24 @@ client.on('message', msg => {
 
     const data = st[second]
     const exampleEmbed = new MessageEmbed()
-      .setColor('#0099ff')
-      .setTitle(data.userId)
-      .setThumbnail(data.userImage)
-      .addFields(
-        { name: 'Guild Name', value: data.guildName },
-        { name: 'Guild ID', value: data.guildId },
-        { name: 'Message ID', value: data.messageId },
-        { name: 'Name', value: data.name },
-        { name: '\u200B', value: '\u200B' },
-        { name: 'Text', value: data.text, inline: true },
-      )
-      .setImage(data.attachments)
-      .setTimestamp()
-      .setFooter('Report bot by: Sagara', 'https://github.com/eiyu');
+    .setColor('#0099ff')
+    // get sender user profile image
+    .setTitle(data.userId)
+    .setThumbnail(data.userImage)
+    .addFields(
+      // get sender name
+      { name: 'Guild Name', value: data.guildName },
+      { name: 'Guild ID', value: data.guildId },
+      { name: 'Message ID', value: data.messageId },
+      { name: 'Reporter Name', value: data.name },
+      { name: '\u200B', value: '\u200B' },
+      // get sender text
+      { name: 'Scammer Id', value: data.text },
+      { name: 'Guide', value: `React to ✅ to ban the scammer or using .ban command \n React to ❌ to delete this embed`, inline: true },
+    )
+    .setImage(data.attachments)
+    .setTimestamp()
+    .setFooter('Report bot by: Sagara', 'https://github.com/eiyu');
 
       msg.channel.send(exampleEmbed).then(async embedMessage => {
         await embedMessage.react('✅');
@@ -186,6 +197,35 @@ client.on('message', msg => {
       });
 
       msg.channel.send(`User id: ${data.userId} \n Channel id: ${data.channelId}`)
+  }
+
+  if(msg.content.startsWith('.wipe')) {
+    // user who can ban
+    
+    if(msg.channel.id != channelID && !banuser.hasOwnProperty(msg.client.user.id)) {
+      msg.channel.send(`Sorry, you don't have permission to this command`)
+      return 
+    }
+    
+    if(second && banuser.hasOwnProperty(msg.author.id)) {
+      
+    const guildIds = client.guilds.cache.map(g => {
+      return g.id
+    })
+    const guildsP = guildIds.map(id => {
+      return client.guilds.fetch(id)
+    })
+    const guilds = Promise.all(guildsP).then(guild => {
+      guild.forEach(g => {
+        
+        g.client.users.fetch(second).then( usr => {
+          g.members.ban(usr)
+          msg.channel.send(`User ${usr.username} has been banned from ${g.name}`)
+        })
+      })
+    }).catch(err => {
+      console.log(err)})
+    }
   }
 
   if(msg.content.startsWith('.ban')) {
@@ -196,50 +236,50 @@ client.on('message', msg => {
       msg.channel.send(`Sorry, you don't have permission to this command`)
       return 
     }
-    console.log(second && third && banuser.hasOwnProperty(msg.client.user.id))
-    if(second && third && banuser.hasOwnProperty(msg.client.user.id)) {
-      client.guilds.fetch(second).then(guild => {
-        guild.client.users.fetch(third).then(user => {
+    
+    if(second && third && banuser.hasOwnProperty(msg.author.id)) {
+      client.guilds.fetch(third).then(guild => {
+        guild.client.users.fetch(second).then(user => {
+          
         const member = guild.members.resolve(user)
-        if(member == null) {
-          client.channels.cache.get(channelID).send(`Sorry you can't ban ${user.username}. The user have not send any message / interaction in the server`)
-          return;
-        }
-        member.ban().then(data => {
         
-        // channel id change to clients -------------------------------------------
-          client.channels.cache.get(channelID).send(`User ${user.username} has been banned from ${guild.name}`)
+          guild.members.ban(user)
+          msg.channel.send(`User ${user.username} has been banned from ${guild.name}`)
           return;
+
         }).catch(err => {
+          msg.channel.send(`Oops.. make sure to type user-id and guild-id correctly`)
           console.log(err)
-        });
-        
-        })                                                
+        })                                              
+      }).catch(err => {
+        msg.channel.send(`Oops.. make sure to type user-id and guild-id correctly`)
+        console.log(err)
       })
     }
   }
   
 });
 
+
+
 client.on('messageReactionAdd', (reaction, user) => {
   const id = reaction.message.embeds[0].fields[2].value
-  const userId = reaction.message.embeds[0].title.valueOf()
+  // scammerId
+  const scammerid = reaction.message.embeds[0].fields[5].value
   const guildId = reaction.message.embeds[0].fields[1].value
+  // console.log(client.user.bot)
   
-  if(reaction.message.guild.id != guildId) return
-    // add more flag like id if want to be safe 
-  if(!user.bot && reaction.emoji.name === '✅' && !banuser.hasOwnProperty(msg.client.user.id) ) {
+  // console.log(!banuser.hasOwnProperty(user.id))
+  if(!user.bot && reaction.emoji.name === '✅' && banuser.hasOwnProperty(user.id) ) {
       // ban / kick
+      // console.log('meep')
+      
       client.guilds.fetch(guildId).then(guild => {
-        guild.client.users.fetch(userId).then(user => {
-        const member = guild.members.resolve(user)
-        member.ban().then(data => {
-        
-        // channel id change to clients -------------------------------------------
-          client.channels.cache.get(channelID).send(`User ${user.username} has been banned from ${guild.name}`)
-        
-        });
-        
+        guild.client.users.fetch(scammerid).then(scm => {
+          
+        guild.members.ban(scm)
+        client.channels.cache.get(channelID).send(`User ${scm.username} has been banned from ${guild.name}`)
+
         })                                                
       })
       let next = store.getState().value
