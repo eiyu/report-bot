@@ -119,9 +119,9 @@ client.on('message', msg => {
     .setTitle('welcome to help')
     .setDescription(`
       This is help page \n
-      .list \n - display unreviewed message
-      .view <message id> \n - display embed message
-      .ban <userid> <guildid> - ban user id from server
+      .list - display unreviewed message \n
+      .view <message id> - display embed message \n
+      .ban <userid> <guildid> - ban user id from server \n
       .wipe <userid> - ban user id (all server)
     `)
     .setFooter('Report bot by: Sagara', 'https://github.com/eiyu');
