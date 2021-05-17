@@ -16,15 +16,13 @@ const banuser = {
   "317283391982534666": true
   }
 
+  // later use?
 const getUserFromMention = (mention) => {
-	// The id is the first and only match found by the RegEx.
+  
 	const matches = mention.match(/^<@!?(\d+)>$/);
 
-	// If supplied variable was not a mention, matches will be null instead of an array.
 	if (!matches) return;
 
-	// However, the first element in the matches array will be the entire mention, not just the ID,
-	// so use index 1.
 	const id = matches[1];
 
 	return client.users.cache.get(id);
@@ -37,10 +35,10 @@ client.on('ready', () => {
 
 console.log('ok..')
   client.user.setPresence({
-      status: "online",  //You can show online, idle....
+      status: "online",  
       activity: {
-          name: "users all over the place",  //The message shown
-          type: "WATCHING" //PLAYING: WATCHING: LISTENING: STREAMING:
+          name: "users all over the place",  
+          type: "WATCHING" 
       }
   });
 });
@@ -54,7 +52,9 @@ client.on('message', msg => {
 
   // if any attachment
   if (msg.attachments.size > 0) {
-
+    if(!msg.content || msg.content.length != 18) {
+      return
+    }
   // if attachment images -------------------------------- replace with guild id
     if (msg.attachments.every(attachIsImage) && client.guilds.id !== 'guild_id'){
       msg.client.users.fetch(msg.author.id).then(user => {
@@ -102,6 +102,8 @@ client.on('message', msg => {
         channel.send(exampleEmbed).then(async embedMessage => {
           await embedMessage.react('✅');
           await embedMessage.react('❌');
+        }).catch(err => {
+          console.log(err)
         });
         channel.send(`Scammer id: ${data.text} \n Channel id: ${data.channelId}`)
 
@@ -194,6 +196,8 @@ client.on('message', msg => {
       msg.channel.send(exampleEmbed).then(async embedMessage => {
         await embedMessage.react('✅');
         await embedMessage.react('❌');
+      }).catch(err => {
+        console.log(err)
       });
 
       msg.channel.send(`User id: ${data.userId} \n Channel id: ${data.channelId}`)
@@ -221,6 +225,8 @@ client.on('message', msg => {
         g.client.users.fetch(second).then( usr => {
           g.members.ban(usr)
           msg.channel.send(`User ${usr.username} has been banned from ${g.name}`)
+        }).catch(err => {
+          console.log(err)
         })
       })
     }).catch(err => {
@@ -263,6 +269,9 @@ client.on('message', msg => {
 
 
 client.on('messageReactionAdd', (reaction, user) => {
+  if(user.id != '' && reaction.message.channel.id != '840477001545941022') {
+    return;
+  }
   const id = reaction.message.embeds[0].fields[2].value
   // scammerId
   const scammerid = reaction.message.embeds[0].fields[5].value
@@ -280,7 +289,11 @@ client.on('messageReactionAdd', (reaction, user) => {
         guild.members.ban(scm)
         client.channels.cache.get(channelID).send(`User ${scm.username} has been banned from ${guild.name}`)
 
+        }).catch(err => {
+          console.log(err)
         })                                                
+      }).catch(err => {
+        console.log(err)
       })
       let next = store.getState().value
       // mutation
