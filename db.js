@@ -5,7 +5,7 @@ const db = {}
 const addFile = (state) => (nextVal) => {
   return Object.assign({},state.value, nextVal)
 }
-
+// 
 const reviewed = (state) => (nextVal) => {
   return state.value
 }
