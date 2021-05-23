@@ -1,0 +1,8 @@
+node_modules
+.env
+playground.js
+echo ".DS_Store" >> ~/Git/.gitignore_global
+echo "._.DS_Store" >> ~/Git/.gitignore_global
+echo "**/.DS_Store" >> ~/Git/.gitignore_global
+echo "**/._.DS_Store" >> ~/Git/.gitignore_global
+git config --global core.excludesfile ~/Git/.gitignore_global.DS_Store
