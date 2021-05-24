@@ -30,9 +30,9 @@ const getUserFromMention = (mention) => {
 	return client.users.cache.get(id)
 }
 
-client.on('ready', () => {
-  
-console.log('ok..')
+client.on('ready', async () => {
+
+console.log('ok..', client.channels.cache.get(channelID).client.guilds.cache.first().name)
   client.user.setPresence({
       status: "online",  
       activity: {
@@ -59,7 +59,7 @@ client.on('message', msg => {
       msg.client.users.fetch(msg.content).then( scammer => {
         msg.client.users.fetch(msg.author.id).then(user => {
           // store.dispatch({type:'addImageURL', avatarURL: user.avatarURL()})
-          console.log('me', user.avatarURL())
+          // console.log('me', user.avatarURL())
           const data = {
             messageId: msg.id,
             name: msg.author.username,
@@ -126,6 +126,58 @@ client.on('message', msg => {
     .setFooter('Report bot by: Sagara', 'https://github.com/eiyu')
     msg.channel.send(helpEmbed)
 
+  }
+
+  if(msg.content.startsWith('.support')) {
+    
+    const infoEmbed = new MessageEmbed()
+    .setColor('#0099ff')
+    .setTitle('Punisher-Bot')
+    .setDescription(`
+    ------------------------------
+    `)
+    .addField(`Join the server for support`, `[SweatHub](https://discord.gg/9uFrdZGg)`, true)
+    .setFooter('The-Punisher by: Sagara', 'https://github.com/eiyu')
+    msg.channel.send(infoEmbed)
+  }
+  if(msg.content.startsWith('.info')) {
+
+    msg.channel.startTyping()
+// generate invites
+    const invites = client.guilds.cache.map(guild => {
+      const channels = guild.channels.cache.filter(channel => channel.type == "text")
+      // const res = await channels.first().createInvite().then(async inv => inv.url)
+      return channels
+    })
+    const serverNames = client.guilds.cache.map(guild => guild.name)
+    const users = client.guilds.cache.map(guild => {
+      return guild.memberCount
+    })
+    const links = invites.map(async (inv,idx) => {
+      const name = serverNames[idx]
+      const value = await inv.first().createInvite().then(async inv => inv.url)
+      return {name:name, value: await value}
+    })
+    const res = Promise.all(links)
+    const infoEmbed = new MessageEmbed()
+    .setColor('#0099ff')
+    .setTitle('Punisher-Bot')
+    .setDescription(`
+    Total servers: ${serverNames.length}
+    Total users  : ${users.reduce((p,n) => {return p+n},0)} 
+    `)
+    .setFooter('Report bot by: Sagara', 'https://github.com/eiyu')
+
+    res.then(val => {
+      val.forEach(val => {
+        infoEmbed.addField(val.name, `[join](${val.value})`, true)
+      })
+    }).then(_ => 
+      msg.channel.send(infoEmbed)
+     
+    ).then(_ =>{
+      msg.channel.stopTyping()
+    }).catch(er => console.log(er))
   }
   
   if(msg.content.startsWith('.list')) {
@@ -265,7 +317,7 @@ client.on('message', msg => {
 
 client.on('messageReactionAdd', (reaction, user) => {
   if(user.id != '' && reaction.message.channel.id != channelID) {
-    console.log('m3ep')
+    // console.log('m3ep')
     return
   }
   const id = reaction.message.embeds[0].fields[2].value
@@ -299,5 +351,4 @@ client.on('messageReactionAdd', (reaction, user) => {
   }
 
 })
-
 client.login(process.env.CLIENT_KEY)
